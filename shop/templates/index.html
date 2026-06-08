@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  /* ── Carousel wrapper ── */
+  .hero-carousel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 2rem 2rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+
+  /* ── Each slide image ── */
+  .hero-carousel .carousel-item img {
+    height: 520px;
+    object-fit: cover;
+    object-position: center;
+    transform: scale(1.04);
+    transition: transform 6s ease;
+    filter: brightness(0.75);
+  }
+  .hero-carousel .carousel-item.active img {
+    transform: scale(1);
+  }
+
+  /* ── Gradient overlay on every slide ── */
+  .hero-carousel .carousel-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(10, 10, 30, 0.55) 0%,
+      rgba(0, 0, 0, 0.15) 60%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ── Caption block ── */
+  .hero-carousel .carousel-caption {
+    bottom: auto;
+    top: 50%;
+    left: 6%;
+    right: auto;
+    transform: translateY(-50%);
+    text-align: left;
+    max-width: 480px;
+  }
+  .hero-carousel .slide-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #f0c040;
+    background: rgba(240,192,64,0.12);
+    border: 1px solid rgba(240,192,64,0.35);
+    padding: 4px 14px;
+    border-radius: 50px;
+    margin-bottom: 0.75rem;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s 0.2s ease, transform 0.5s 0.2s ease;
+  }
+  .hero-carousel .slide-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: #fff;
+    margin-bottom: 0.6rem;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.55s 0.35s ease, transform 0.55s 0.35s ease;
+  }
+  .hero-carousel .slide-sub {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.78);
+    margin-bottom: 1.4rem;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s 0.5s ease, transform 0.5s 0.5s ease;
+  }
+  .hero-carousel .slide-btn {
+    display: inline-block;
+    padding: 0.65rem 1.8rem;
+    background: #f0c040;
+    color: #111;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.06em;
+    border-radius: 50px;
+    text-decoration: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.45s 0.65s ease, transform 0.45s 0.65s ease,
+                background 0.25s ease;
+  }
+  .hero-carousel .slide-btn:hover {
+    background: #ffd966;
+    color: #000;
+  }
+
+  /* Animate in when slide is active */
+  .hero-carousel .carousel-item.active .slide-eyebrow,
+  .hero-carousel .carousel-item.active .slide-title,
+  .hero-carousel .carousel-item.active .slide-sub,
+  .hero-carousel .carousel-item.active .slide-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Indicators (pill style) ── */
+  .hero-carousel .carousel-indicators {
+    bottom: 1.4rem;
+    gap: 6px;
+    margin: 0;
+    justify-content: flex-end;
+    padding-right: 1.8rem;
+  }
+  .hero-carousel .carousel-indicators [data-bs-slide-to] {
+    width: 28px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.4);
+    border: none;
+    transition: width 0.35s ease, background 0.3s ease;
+    opacity: 1;
+  }
+  .hero-carousel .carousel-indicators .active {
+    width: 52px;
+    background: #f0c040;
+  }
+
+  /* ── Prev / Next buttons ── */
+  .hero-carousel .carousel-control-prev,
+  .hero-carousel .carousel-control-next {
+    width: 52px;
+    height: 52px;
+    top: 50%;
+    transform: translateY(-50%);
+    bottom: auto;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(6px);
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.25);
+    opacity: 0;
+    transition: opacity 0.3s ease, background 0.25s ease;
+  }
+  .hero-carousel:hover .carousel-control-prev,
+  .hero-carousel:hover .carousel-control-next {
+    opacity: 1;
+  }
+  .hero-carousel .carousel-control-prev { left: 1.2rem; }
+  .hero-carousel .carousel-control-next { right: 1.2rem; }
+  .hero-carousel .carousel-control-prev:hover,
+  .hero-carousel .carousel-control-next:hover {
+    background: rgba(240,192,64,0.35);
+  }
+</style>
+
+<div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel">
+
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+  </div>
+
+  <div class="carousel-inner">
+
+    <div class="carousel-item active" data-bs-interval="4000">
+      <img src="{% static 'images/1.jpg' %}" class="d-block w-100" alt="First slide">
+      <div class="carousel-caption">
+        <span class="slide-eyebrow">New Arrivals</span>
+        <h2 class="slide-title">Style That Speaks for Itself</h2>
+        <p class="slide-sub">Discover our latest collection curated just for you.</p>
+        <a href="{% url 'collections' %}" class="slide-btn">Shop Now →</a>
+      </div>
+    </div>
+
+    <div class="carousel-item" data-bs-interval="4000">
+      <img src="{% static 'images/2.jpg' %}" class="d-block w-100" alt="Second slide">
+      <div class="carousel-caption">
+        <span class="slide-eyebrow">Limited Deals</span>
+        <h2 class="slide-title">Up to 40% Off This Week</h2>
+        <p class="slide-sub">Flash sale on top brands — while stocks last.</p>
+        <a href="{% url 'collections' %}" class="slide-btn">View Offers →</a>
+      </div>
+    </div>
+
+    <div class="carousel-item" data-bs-interval="4000">
+      <img src="{% static 'images/3.jpg' %}" class="d-block w-100" alt="Third slide">
+      <div class="carousel-caption">
+        <span class="slide-eyebrow">Trending Now</span>
+        <h2 class="slide-title">Top Picks of the Season</h2>
+        <p class="slide-sub">What everyone's adding to their cart right now.</p>
+        <a href="{% url 'collections' %}" class="slide-btn">Explore →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+
+</div>
+
+{% include 'trending_products.html' %}
+{% endblock %}

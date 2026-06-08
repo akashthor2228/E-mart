@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3 class="mb-4">🛒 Order Summary</h3>
+
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in cart %}
+      <tr>
+        <td>{{ item.product.name }}</td>
+        <td>₹{{ item.product.selling_price }}</td>
+        <td>{{ item.product_qty }}</td>
+        <td>₹{{ item.total_cost }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="3" class="text-end">Total</th>
+        <th>₹{{ total }}</th>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- Payment Method -->
+  <div class="card mb-4">
+    <div class="card-header fw-bold">Select Payment Method</div>
+    <div class="card-body">
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="radio" name="pay_method" id="optUPI" value="upi" checked>
+        <label class="form-check-label" for="optUPI">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/100px-UPI-Logo-vector.svg.png"
+               height="22" alt="UPI" class="me-1">
+          UPI (GPay, PhonePe, Paytm, BHIM)
+        </label>
+      </div>
+
+      <!-- UPI ID input -->
+      <div id="upiBox" class="ms-4 mb-3">
+        <input type="text" id="upiId" class="form-control w-auto d-inline-block"
+               placeholder="yourname@okaxis" style="min-width:240px">
+        <small id="upiMsg" class="ms-2 text-danger"></small>
+      </div>
+
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="radio" name="pay_method" id="optCard" value="card">
+        <label class="form-check-label" for="optCard">💳 Credit / Debit Card</label>
+      </div>
+
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="radio" name="pay_method" id="optNB" value="netbanking">
+        <label class="form-check-label" for="optNB">🏦 Net Banking</label>
+      </div>
+
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="pay_method" id="optWallet" value="wallet">
+        <label class="form-check-label" for="optWallet">👛 Wallet (Paytm, Mobikwik…)</label>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="text-end">
+    <button id="pay-btn" type="button" class="btn btn-success btn-lg">
+      💳 Pay ₹{{ total }} Now
+    </button>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  // ── Show/hide UPI ID box ─────────────────────────────────
+  document.querySelectorAll('input[name="pay_method"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      document.getElementById('upiBox').style.display =
+        (this.value === 'upi') ? 'block' : 'none';
+    });
+  });
+
+  // ── Pay button ───────────────────────────────────────────
+  document.getElementById("pay-btn").addEventListener("click", async function () {
+
+    const method = document.querySelector('input[name="pay_method"]:checked').value;
+    const upiId  = document.getElementById('upiId').value.trim();
+
+    // Validate UPI ID before calling backend
+    if (method === 'upi' && !upiId) {
+      document.getElementById('upiMsg').textContent = 'Please enter your UPI ID.';
+      document.getElementById('upiId').focus();
+      return;
+    }
+    document.getElementById('upiMsg').textContent = '';
+
+    // ── 1. Create order (POST) ───────────────────────────
+    let data;
+    try {
+      const res = await fetch("{% url 'create_order' %}", {
+        method: "POST",                              // ✅ was missing — caused 405
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({})
+      });
+      data = await res.json();
+    } catch (err) {
+      alert("Could not reach server. Please try again.");
+      return;
+    }
+
+    if (!data.order_id) {
+      alert("Order creation failed: " + (data.status || "Unknown error"));
+      return;
+    }
+
+    // ── 2. Build Razorpay options ────────────────────────
+    const options = {
+      key:         data.key,
+      amount:      data.amount,
+      currency:    "INR",
+      name:        "E-MarT",
+      description: "Order Payment",
+      order_id:    data.order_id,
+      prefill: {
+        name:    data.name,
+        email:   data.email,
+        contact: data.contact || "",
+        vpa:     method === "upi" ? upiId : ""   // pre-fills UPI ID in modal
+      },
+      // Open the chosen method's tab first inside the Razorpay modal
+      method: {
+        upi:        method === "upi",
+        card:       method === "card",
+        netbanking: method === "netbanking",
+        wallet:     method === "wallet",
+        emi:        false,
+      },
+      theme: { color: "#198754" },
+
+      // ── 3. On payment success → verify ────────────────
+      handler: function (response) {
+        fetch("{% url 'verify_payment' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify(response)
+        })
+        .then(r => r.json())
+        .then(d => {
+          if (d.status === "success") {
+            window.location.href = "{% url 'order_success' %}";
+          } else {
+            alert("❌ Payment verification failed. Contact support.");
+          }
+        })
+        .catch(function() {
+          alert("Verification request failed. Contact support.");
+        });
+      },
+
+      modal: {
+        ondismiss: function () {
+          console.log("Payment modal closed.");
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.on('payment.failed', function(response) {
+      alert("❌ Payment failed: " + response.error.description);
+    });
+
+    rzp.open();
+  });
+</script>
+
+{% endblock %}

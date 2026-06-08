@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="py-4" style="margin-top:0px;">
+    <div class="container">
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <h4 class="mb-3">User Login Page</h4>
+                <hr style="border-color:#b8bfc2;">
+                {% include 'messages.html' %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <form method="POST" action="">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" name="username" placeholder="Enter your username">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" name="password" placeholder="Enter your password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+
+                <p class="my-2">New user? <a href="{% url 'register' %}">Register now</a></p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

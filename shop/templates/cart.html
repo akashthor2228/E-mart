@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <section class="bg-light py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="fw-semibold text-dark">Cart Items</h4>
+                <hr class="w-25">
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Unit</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                    <th>Remove</th>
+                </tr>
+
+                {% for item in cart %}
+                <tr>
+                    <td><img src="{{ item.product.product_image }}" height="75px" alt="{{ item.product.name }}"></td>
+                    <td>{{ item.product.name }}</td>
+                    <td>₹{{ item.product.selling_price | stringformat:'d' }}</td>
+                    <td>{{ item.product_qty }}</td>
+                    <td class="amt">{{ item.total_cost | stringformat:'d' }}</td>
+                    <td>
+                        <a href="{% url 'remove_cart' item.id %}"
+                           onclick="return confirm('Are you sure to Remove?')"
+                           class="btn btn-danger btn">
+                           <i class="fa fa-trash"></i> Remove
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td colspan="2"><strong>Total Amount</strong></td>
+                    <td id="net" colspan="3">0</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- ✅ Checkout Button -->
+        {% if cart %}
+        <div class="text-end mt-3 pe-2">
+            <a href="{% url 'checkout' %}" class="btn btn-success btn-lg px-5">
+                Proceed to Checkout →
+            </a>
+        </div>
+        {% else %}
+        <div class="text-center mt-4">
+            <p class="text-muted">Your cart is empty.</p>
+            <a href="/" class="btn btn-primary">🛍️ Continue Shopping</a>
+        </div>
+        {% endif %}
+
+    </section>
+</div>
+
+<script>
+    const nodes = document.querySelectorAll('.amt');
+    const arr = Array.from(nodes);
+    const res = arr.reduce((acc, curr) => {
+        return acc += Number(curr.textContent);
+    }, 0);
+    document.getElementById("net").innerHTML = "₹ " + res;
+</script>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<section class="bg-light py-4" style="min-height:600px;">
+    <div class="container">
+
+        <!-- 🔷 Title -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="fw-semibold text-dark">{{ category_name }} Products</h4>
+                <hr class="w-25">
+            </div>
+        </div>
+
+        <!-- 🔷 Products -->
+        <div class="row g-4">
+            {% for item in products %}
+            <div class="col-md-4 col-lg-3">
+
+                <div class="card h-100 shadow-sm border-0 product-card">
+
+                    <!-- FULL CARD CLICKABLE -->
+                    <a href="{% url 'product_details' category_name item.name %}" class="text-decoration-none text-dark">
+
+                        <!-- Image -->
+                        <img src="{{ item.product_image }}"
+                             class="card-img-top p-3"
+                             style="height:200px; object-fit:contain;"
+                             alt="product">
+
+                        <!-- Content -->
+                        <div class="card-body text-center">
+
+                            <h6 class="fw-bold">{{ item.name }}</h6>
+
+                            <!-- Price -->
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="old_price text-muted small">
+                                    <s>Rs.{{ item.original_price }}</s>
+                                </span>
+                                <span class="new_price fw-bold">
+                                    Rs.{{ item.selling_price }}
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

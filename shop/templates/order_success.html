@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container text-center mt-5">
+  <div class="card shadow p-5 mx-auto" style="max-width:500px;">
+    <h1 class="text-success">🎉 Order Placed!</h1>
+    <p class="text-muted mt-3">Thank you for shopping at <strong>E-MarT</strong></p>
+    <hr>
+    <p><strong>Order ID:</strong> {{ order.razorpay_order_id }}</p>
+    <p><strong>Payment ID:</strong> {{ order.razorpay_payment_id }}</p>
+    <p><strong>Amount Paid:</strong> ₹{{ order.amount }}</p>
+    <p><strong>Status:</strong> 
+      <span class="badge bg-success">{{ order.status|upper }}</span>
+    </p>
+    <a href="/" class="btn btn-primary mt-3">🛍️ Continue Shopping</a>
+  </div>
+</div>
+
+{% endblock %}
