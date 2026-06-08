@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -82,10 +84,6 @@ WSGI_APPLICATION = 'EcommercePortal.wsgi.application'
 #     }
 # }
 
-print("DB_HOST =", os.getenv("DB_HOST"))
-print("DB_NAME =", os.getenv("DB_NAME"))
-print("DB_USER =", os.getenv("DB_USER"))
-print("DB_PORT =", os.getenv("DB_PORT"))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
